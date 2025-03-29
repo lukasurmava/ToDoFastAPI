@@ -14,7 +14,7 @@ def read_root():
     return {"message": "Hello, FastAPI, I'm Luka!"}
 
 @app.get("/todos/{todo_id}")
-def get_todo(todo_id):
+def get_todo(todo_id: int):
     for todo in todos:
         if todo["todo_id"] == todo_id:
             return {"result": todo}
