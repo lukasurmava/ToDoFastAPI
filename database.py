@@ -1,11 +1,23 @@
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.orm import relationship
+import enum
+from sqlalchemy import enum
 
 DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(DATABASE_URL, echo=True)
 
 Base = declarative_base()
+
+class Priority(enum.IntEnum):
+    LOW = 0
+    MEDIUM = 1
+    HIGH = 2
+
+class Status(enum.IntEnum):
+    IN_PROGRESS = 0
+    COMPLETED = 1
+    PENDING = 2
 
 class User(Base):
     __tablename__ = "users"
@@ -16,11 +28,13 @@ class User(Base):
 
 class Todo(Base):
     __tablename__ = "todos"
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True) # აქ უნდა დაემატოს index=True და მერე დავამატებ და თან ვკითხავ ჯიპიტის რატო
     title = Column(String)
     description = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="todos")
+    priority = Column(Enum(Priority), nullable=False)
+    status = Column(Enum(Status), nullable=False)
 
 # Create the table in the database
 Base.metadata.create_all(bind=engine)
@@ -28,3 +42,6 @@ Base.metadata.create_all(bind=engine)
 # Create a session to interact with the database
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 session = SessionLocal()
+
+
+
