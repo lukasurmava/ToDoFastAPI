@@ -1,8 +1,6 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Enum
-from sqlalchemy.orm import declarative_base, sessionmaker
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 import enum
-from sqlalchemy import enum
 
 DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(DATABASE_URL, echo=True)
@@ -21,14 +19,14 @@ class Status(enum.IntEnum):
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
     username = Column(String)
     email = Column(String)
     todos = relationship("Todo", back_populates="user")
 
 class Todo(Base):
     __tablename__ = "todos"
-    id = Column(Integer, primary_key=True) # აქ უნდა დაემატოს index=True და მერე დავამატებ და თან ვკითხავ ჯიპიტის რატო
+    id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
     description = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"))
@@ -44,4 +42,12 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 session = SessionLocal()
 
 
+def create_new_user(db_session, name: str, email: str):
+    new_user = User(username=name, email=email)
+    db_session.add(new_user)
+    db_session.commit()
+    db_session.refresh(new_user)
+    return new_user
 
+def get_all_users(db_session):
+    return db_session.query(User).all()
