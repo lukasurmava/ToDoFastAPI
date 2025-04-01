@@ -46,3 +46,6 @@ def get_all_users(db: SessionLocal = Depends(get_db)):
 @app.on_event("startup")
 def on_startup():
     seed_db()
+
+
+#this is what is it
