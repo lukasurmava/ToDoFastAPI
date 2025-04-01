@@ -1,42 +1,30 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Enum
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship
-import enum
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session
+from sqlalchemy.pool import StaticPool
 
-DATABASE_URL = "sqlite:///./test.db"
-engine = create_engine(DATABASE_URL, echo=True)
-
+# --- Database Setup ---
+DATABASE_URL = "sqlite:///:memory:"  # In-memory DB
+engine = create_engine(
+    DATABASE_URL,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,  # Ensures all sessions share the same connection
+    echo=True  # Debug: prints SQL statements
+)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-
-class Priority(enum.IntEnum):
-    LOW = 0
-    MEDIUM = 1
-    HIGH = 2
-
-class Status(enum.IntEnum):
-    IN_PROGRESS = 0
-    COMPLETED = 1
-    PENDING = 2
-
+# --- SQLAlchemy Model ---
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String)
-    email = Column(String)
-    #todos = relationship("Todo", back_populates="user")
+    username = Column(String, unique=True, index=True)
+    email = Column(String, unique=True, index=True)
 
-class Todo(Base):
-    __tablename__ = "todos"
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    description = Column(String)
-    #user_id = Column(Integer, ForeignKey("users.id"))
-    #user = relationship("User", back_populates="todos")
-    priority = Column(Enum(Priority), nullable=False)
-    status = Column(Enum(Status), nullable=False)
+# Create the tables
+Base.metadata.create_all(bind=engine)
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+# Dependency: get a DB session per request
 def get_db():
     db = SessionLocal()
     try:
@@ -44,13 +32,15 @@ def get_db():
     finally:
         db.close()
 
-
-def create_new_user(db_session, name: str, email: str):
-    new_user = User(username=name, email=email)
-    db_session.add(new_user)
-    db_session.commit()
-    db_session.refresh(new_user)
-    return new_user
-
-def get_all_users(db_session):
-    return db_session.query(User).all()
+def seed_db():
+    db: Session = SessionLocal()
+    # Only seed if there are no records
+    if not db.query(User).first():
+        test_users = [
+            User(username="alice", email="alice@example.com"),
+            User(username="bob", email="bob@example.com"),
+            User(username="charlie", email="charlie@example.com"),
+        ]
+        db.add_all(test_users)
+        db.commit()
+    db.close()

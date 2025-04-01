@@ -1,51 +1,69 @@
-from fastapi import FastAPI, Depends
-from sqlalchemy.orm import session
-from database import SessionLocal, engine, Base, User
-from schemas import UserCreate, UserResponse
-from typing import List
+from fastapi import FastAPI, HTTPException, Depends
+from pydantic import BaseModel
 
-# Initialize FastAPI
+from database import seed_db
+from schemas import UserCreate, UserResponse, UserUpdate
+from typing import List, Optional
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.pool import StaticPool
+from database import get_db, seed_db, User
+
+
+
+# --- FastAPI App Setup ---
 app = FastAPI()
 
-# Create tables in database (only needed for in-memory DB)
-#Base.metadata.create_all(bind=engine)
-
-# Get DB session
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-def seed_db():
-    db_session = SessionLocal()
-    users_to_create = [
-        {"username": "dorandel", "email": "surmava@gmail.com"},
-        {"username": "chuvaldesa", "email": "chuvaldesa@gmail.com"},
-        {"username": "liova", "email": "liova@gmail.com"},
-    ]
-    for user in users_to_create:
-        new_seed_user = User(username=user["username"], email=user["email"])
-        db_session.add(new_seed_user)
-    db_session.commit()
-    db_session.close()
-
-@app.get("/users/create", response_model=UserResponse)
-def create_users(user: UserCreate, db: SessionLocal = Depends(get_db)):
-    new_user = User(username=user.username, email=user.email)
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return new_user
-
-@app.get("/users", response_model=List[UserResponse])
-def get_all_users(db: SessionLocal = Depends(get_db)):
-    return db.query(User).all()
-
+# Seed the database with test records at startup
 @app.on_event("startup")
 def on_startup():
     seed_db()
 
+# --- CRUD Endpoints ---
 
-#this is what is it
+# Create a new user
+@app.post("/users/", response_model=UserResponse)
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
+    db_user = User(username=user.username, email=user.email)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+# Get all users
+@app.get("/users/", response_model=List[UserResponse])
+def read_users(db: Session = Depends(get_db)):
+    return db.query(User).all()
+
+# Get a user by ID
+@app.get("/users/{user_id}", response_model=UserResponse)
+def read_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
+
+# Update a user by ID
+@app.put("/users/{user_id}", response_model=UserResponse)
+def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.username is not None:
+        db_user.username = user.username
+    if user.email is not None:
+        db_user.email = user.email
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+# Delete a user by ID
+@app.delete("/users/{user_id}")
+def delete_user(user_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    db.delete(db_user)
+    db.commit()
+    return {"detail": "User deleted"}
