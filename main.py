@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 
 from database import seed_db
-from schemas import UserCreate, UserResponse, UserUpdate, TodoResponse, TodoCreate
+from schemas import UserCreate, UserResponse, UserUpdate, TodoResponse, TodoCreate, TodoUpdate
 from typing import List, Optional
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
@@ -77,6 +77,30 @@ def create_todo(todo: TodoCreate, db: Session = Depends(get_db)):
     db.refresh(db_todo)
     return db_todo
 
+# Get all todos
 @app.get("/todos/", response_model=List[TodoResponse])
 def read_todos(db: Session = Depends(get_db)):
     return db.query(Todo).all()
+
+# Get a todos by ID
+@app.get("/todos/{todo_id}", response_model=TodoResponse)
+def read_todo(todo_id: int, db: Session = Depends(get_db)):
+    db_todo = db.query(Todo).filter(Todo.id == todo_id).first()
+    if not db_todo:
+        raise HTTPException(status_code=404, detail="Todo not found")
+    return db_todo
+
+# Update a todos by ID
+@app.put("/todos/{todo_id}", response_model=TodoResponse)
+def update_todo(todo_id: int, todo: TodoUpdate, db: Session = Depends(get_db)):
+    db_todo = db.query(Todo).filter(Todo.id == todo_id).first()
+    if not db_todo:
+        raise HTTPException(status_code=404, detail="Todo not found")
+    db_todo.title = todo.title
+    db_todo.description = todo.description
+    db_todo.status = todo.status
+    db_todo.priority = todo.priority
+    db_todo.user_id = todo.user_id
+    db.commit()
+    db.refresh(db_todo)
+    return db_todo
