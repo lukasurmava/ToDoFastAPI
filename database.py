@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session
 from sqlalchemy.pool import StaticPool
+import enum
 
 # --- Database Setup ---
 DATABASE_URL = "sqlite:///:memory:"  # In-memory DB
@@ -13,12 +14,35 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
+class StatusEnum(str, enum):
+    IN_PROGRESS = "In progress"
+    COMPLETED = "Completed"
+    PENDING = "Pending"
+
+class PriorityEnum(str, enum):
+    LOW = "Low"
+    MEDIUM = "Medium"
+    HIGH = "High"
+
+
 # --- SQLAlchemy Model ---
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     email = Column(String, unique=True, index=True)
+    todos = relationship("Todo", back_populates="user")
+
+class Todo(Base):
+    __tablename__ = "todos"
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String)
+    description = Column(String)
+    status = Column(StatusEnum)
+    priority = Column(PriorityEnum)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship("User", back_populates="todos")
+
 
 # Create the tables
 Base.metadata.create_all(bind=engine)
