@@ -1,3 +1,5 @@
+from enum import IntEnum
+
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session
 from sqlalchemy.pool import StaticPool
@@ -14,15 +16,15 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-class StatusEnum(str, enum):
-    IN_PROGRESS = "In progress"
-    COMPLETED = "Completed"
-    PENDING = "Pending"
+class StatusEnum(IntEnum):
+    IN_PROGRESS = 0
+    COMPLETED = 1
+    PENDING = 2
 
-class PriorityEnum(str, enum):
-    LOW = "Low"
-    MEDIUM = "Medium"
-    HIGH = "High"
+class PriorityEnum(IntEnum):
+    LOW = 0
+    MEDIUM = 1
+    HIGH = 2
 
 
 # --- SQLAlchemy Model ---
@@ -38,8 +40,8 @@ class Todo(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
     description = Column(String)
-    status = Column(StatusEnum)
-    priority = Column(PriorityEnum)
+    status = Column(Integer)
+    priority = Column(Integer)
     user_id = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="todos")
 
@@ -66,5 +68,11 @@ def seed_db():
             User(username="rezili", email="rezili@example.com"),
         ]
         db.add_all(test_users)
+        db.commit()
+    if not db.query(Todo).first():
+        test_todos = [
+            Todo(title="vnaxot aba", description="miidi ra imushave", status=1, priority=1, user_id=1)
+        ]
+        db.add_all(test_todos)
         db.commit()
     db.close()

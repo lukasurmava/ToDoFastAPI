@@ -2,13 +2,13 @@ from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 
 from database import seed_db
-from schemas import UserCreate, UserResponse, UserUpdate
+from schemas import UserCreate, UserResponse, UserUpdate, TodoResponse, TodoCreate
 from typing import List, Optional
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import StaticPool
-from database import get_db, seed_db, User
+from database import get_db, seed_db, User, Todo
 
 
 
@@ -67,3 +67,16 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.delete(db_user)
     db.commit()
     return {"detail": "User deleted"}
+
+# Create a new todos
+@app.post("/todos/", response_model=TodoResponse)
+def create_todo(todo: TodoCreate, db: Session = Depends(get_db)):
+    db_todo = Todo(title=todo.title, description=todo.description, status=todo.status, priority=todo.priority, user_id=todo.user_id)
+    db.add(db_todo)
+    db.commit()
+    db.refresh(db_todo)
+    return db_todo
+
+@app.get("/todos/", response_model=List[TodoResponse])
+def read_todos(db: Session = Depends(get_db)):
+    return db.query(Todo).all()
