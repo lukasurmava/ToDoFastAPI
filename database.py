@@ -2,10 +2,11 @@ from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship
 import enum
 
-DATABASE_URL = "sqlite:///:memory:"
+DATABASE_URL = "sqlite:///./test.db"
 engine = create_engine(DATABASE_URL, echo=True)
 
 Base = declarative_base()
+
 
 class Priority(enum.IntEnum):
     LOW = 0
@@ -22,24 +23,26 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String)
     email = Column(String)
-    todos = relationship("Todo", back_populates="user")
+    #todos = relationship("Todo", back_populates="user")
 
 class Todo(Base):
     __tablename__ = "todos"
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String)
     description = Column(String)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("User", back_populates="todos")
+    #user_id = Column(Integer, ForeignKey("users.id"))
+    #user = relationship("User", back_populates="todos")
     priority = Column(Enum(Priority), nullable=False)
     status = Column(Enum(Status), nullable=False)
 
-# Create the table in the database
-Base.metadata.create_all(bind=engine)
-
-# Create a session to interact with the database
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-session = SessionLocal()
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 def create_new_user(db_session, name: str, email: str):

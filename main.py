@@ -8,7 +8,7 @@ from typing import List
 app = FastAPI()
 
 # Create tables in database (only needed for in-memory DB)
-Base.metadata.create_all(bind=engine)
+#Base.metadata.create_all(bind=engine)
 
 # Get DB session
 def get_db():
@@ -26,7 +26,7 @@ def seed_db():
         {"username": "liova", "email": "liova@gmail.com"},
     ]
     for user in users_to_create:
-        new_seed_user = UserCreate(username=user["username"], email=user["email"])
+        new_seed_user = User(username=user["username"], email=user["email"])
         db_session.add(new_seed_user)
     db_session.commit()
     db_session.close()
