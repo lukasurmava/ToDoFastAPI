@@ -1,7 +1,31 @@
 from pydantic import BaseModel
-
+from database import PriorityEnum, StatusEnum
 
 # --- Pydantic Schemas ---
+
+class TodoCreate(BaseModel):
+    title: str
+    description: str
+    status: StatusEnum
+    priority: PriorityEnum
+    user_id: int
+
+class TodoUpdate(BaseModel):
+    title: str = None
+    description: str = None
+    status: StatusEnum = None
+    priority: PriorityEnum = None
+    user_id: int
+
+class TodoResponse(BaseModel):
+    id: int
+    title: str
+    description: str
+    status: StatusEnum
+    priority: PriorityEnum
+    user_id: int
+
+
 class UserCreate(BaseModel):
     username: str
     email: str

@@ -61,9 +61,9 @@ def seed_db():
     # Only seed if there are no records
     if not db.query(User).first():
         test_users = [
-            User(username="alice", email="alice@example.com"),
-            User(username="bob", email="bob@example.com"),
-            User(username="charlie", email="charlie@example.com"),
+            User(username="chuva", email="chuva@example.com"),
+            User(username="liova", email="liova@example.com"),
+            User(username="rezili", email="rezili@example.com"),
         ]
         db.add_all(test_users)
         db.commit()
