@@ -114,3 +114,7 @@ def delete_todo(todo_id: int, db: Session = Depends(get_db)):
     db.delete(db_todo)
     db.commit()
     return {"detail": "Todo deleted"}
+
+@app.get("/todos/byuser", response_model=List[TodoResponse])
+def get_todo_by_user(user_id: int, db: Session = Depends(get_db)):
+    return db.query(Todo).filter(Todo.user_id == user_id).all()

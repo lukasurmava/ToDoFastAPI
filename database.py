@@ -71,7 +71,12 @@ def seed_db():
         db.commit()
     if not db.query(Todo).first():
         test_todos = [
-            Todo(title="vnaxot aba", description="miidi ra imushave", status=1, priority=1, user_id=1)
+            Todo(title="ბევრი იმუშაოს", description="ჩუვამ ბევრი უნდა იმუშაოს რო ძმა ბიჭებს წყნარად ეძინოთ ღამე", status=1, priority=2, user_id=1),
+            Todo(title="ლუდები სვას გასკდომამდე", description="ბევრი ლუდი უნდა დალიოს რო მძღნერ ხასიათზე არ იყოს", status=1, priority=2, user_id=1),
+            Todo(title="ლიოვას მელანქოლია", description="უნდა ინერვიულოს, ოჯახში ყველას სანერვიულო ლიოვამ უნდა ინერვიულოს",status=2, priority=2, user_id=2),
+            Todo(title="გინებას გადაეჩვიოს", description="გინებას დაეჩვია ბოლო პერიოდი, ვინ იქნება შემდეგი მსხვერპლი არ ვიცით", status=2, priority=2, user_id=2),
+            Todo(title="ბინა გაარემონტოს", description="დროა აწი მორჩეს მაგ ბინის რემონტს", status=2, priority=2, user_id=3),
+            Todo(title="დოტკის ლიგა მოხოდოს", description="დიდი გეგმები აქვს რეზილს კიბერსპორტში", status=2, priority=2, user_id=3)
         ]
         db.add_all(test_todos)
         db.commit()
