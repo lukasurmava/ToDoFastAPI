@@ -40,4 +40,4 @@ class UserResponse(BaseModel):
     email: str
 
     class Config:
-        orm_mode = True  # Tells Pydantic to read data from ORM objects
+        from_attributes = True  # Tells Pydantic to read data from ORM objects
