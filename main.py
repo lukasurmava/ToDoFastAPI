@@ -1,7 +1,9 @@
+from idlelib.query import Query
+
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 
-from database import seed_db
+from database import StatusEnum, PriorityEnum
 from schemas import UserCreate, UserResponse, UserUpdate, TodoResponse, TodoCreate, TodoUpdate
 from typing import List, Optional
 from sqlalchemy import create_engine, Column, Integer, String
@@ -123,3 +125,7 @@ async def get_todo_by_user(user_id: int, db: Session = Depends(get_db)):
 @app.get("/todos/{user_id}/todobyuser/{todo_id}", response_model=TodoResponse)
 async def get_todo_by_todoid_userid(user_id: int, todo_id: int, db: Session = Depends(get_db)):
     return db.query(Todo).filter(Todo.user_id == user_id, Todo.id == todo_id).first()
+
+@app.get("/todos/getbypriority/", response_model=List[TodoResponse])
+async def get_todo_by_priority(priority: PriorityEnum, db: Session = Depends(get_db)):
+    return db.query(Todo).filter(Todo.priority == priority.value).all()
