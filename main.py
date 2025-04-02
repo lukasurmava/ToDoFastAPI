@@ -119,3 +119,7 @@ def delete_todo(todo_id: int, db: Session = Depends(get_db)):
 @app.get("/todos/todobyuser/{user_id}", response_model=List[TodoResponse])
 async def get_todo_by_user(user_id: int, db: Session = Depends(get_db)):
     return db.query(Todo).filter(Todo.user_id == user_id).all()
+
+@app.get("/todos/{user_id}/todobyuser/{todo_id}", response_model=TodoResponse)
+async def get_todo_by_todoid_userid(user_id: int, todo_id: int, db: Session = Depends(get_db)):
+    return db.query(Todo).filter(Todo.user_id == user_id, Todo.id == todo_id).first()

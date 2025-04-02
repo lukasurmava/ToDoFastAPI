@@ -6,15 +6,15 @@ from database import PriorityEnum, StatusEnum
 class TodoCreate(BaseModel):
     title: str
     description: str
-    status: int
-    priority: int
+    status: StatusEnum
+    priority: PriorityEnum
     user_id: int
 
 class TodoUpdate(BaseModel):
     title: str = None
     description: str = None
-    status: int = None
-    priority: int = None
+    status: StatusEnum
+    priority: PriorityEnum
     user_id: int
 
 class TodoResponse(BaseModel):
