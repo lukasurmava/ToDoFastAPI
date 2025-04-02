@@ -1,9 +1,8 @@
-from enum import IntEnum, StrEnum
+from enum import StrEnum
 
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Enum
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session
 from sqlalchemy.pool import StaticPool
-import enum
 
 # --- Database Setup ---
 DATABASE_URL = "sqlite:///:memory:"  # In-memory DB
