@@ -100,7 +100,7 @@ def update_todo(todo_id: int, todo: TodoUpdate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Todo not found")
     if not todo.title:
         raise HTTPException(status_code=422, detail="title can't be empty!")
-    if not db.query(User).filter(User.id == todo.user_id):
+    if not db.query(User).filter(User.id == todo.user_id).first():
         raise HTTPException(status_code=404, detail="User not found")
     db_todo.title = todo.title
     db_todo.description = todo.description
@@ -124,13 +124,15 @@ def delete_todo(todo_id: int, db: Session = Depends(get_db)):
 # Get todos by user
 @app.get("/todos/todobyuser/{user_id}", response_model=List[TodoResponse])
 async def get_todo_by_user(user_id: int, db: Session = Depends(get_db)):
-    if not db.query(User).filter(User.id == user_id):
+    if not db.query(User).filter(User.id == user_id).first():
         raise HTTPException(status_code=404, detail="User not found")
+    if not db.query(Todo).filter(Todo.user_id == user_id).all():
+        raise HTTPException(status_code=404, detail="No todo found for this user!")
     return db.query(Todo).filter(Todo.user_id == user_id).all()
 
 @app.get("/todos/{user_id}/todobyuser/{todo_id}", response_model=TodoResponse)
 async def get_todo_by_todoid_userid(user_id: int, todo_id: int, db: Session = Depends(get_db)):
-    if not db.query(User).filter(User.id == user_id):
+    if not db.query(User).filter(User.id == user_id).first():
         raise HTTPException(status_code=404, detail="User not found")
     todo = db.query(Todo).filter(Todo.user_id == user_id, Todo.id == todo_id).first()
     if not todo:

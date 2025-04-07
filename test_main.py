@@ -100,3 +100,110 @@ def test_create_todo_user_not_found():
     data = response.json()
     assert data["detail"] == "User by this id is not found!"
 
+def test_get_all_todos():
+    response = client.get("/todos/")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+def test_get_todo_by_id():
+    response = client.get("/todos/1")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["title"] == "test_todo"
+    assert data["description"] == "test description"
+    assert data["status"] == "Pending"
+    assert data["priority"] == "Medium"
+    assert data["user_id"] == 1
+
+def test_get_todo_by_id_not_found():
+    response = client.get("/todos/4343")
+    assert response.status_code == 404
+    data = response.json()
+    assert data["detail"] == "Todo not found"
+
+def test_update_todo():
+    new_todo = {"title": "test_todo_update", "description": "test description update", "status": "Completed", "priority": "Low", "user_id": 1}
+    response = client.put("/todos/1", json= new_todo)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["title"] == new_todo["title"]
+    assert data["description"] == new_todo["description"]
+    assert data["status"] == new_todo["status"]
+    assert data["priority"] == new_todo["priority"]
+
+def test_update_todo_not_found():
+    new_todo = {"title": "test_todo_update", "description": "test description update", "status": "Completed", "priority": "Low", "user_id": 1}
+    response = client.put("/todos/34324", json=new_todo)
+    assert response.status_code == 404
+    data = response.json()
+    assert data["detail"] == "Todo not found"
+
+def test_update_todo_empty_title():
+    new_todo = {"title": "", "description": "test description update", "status": "Completed", "priority": "Low", "user_id": 1}
+    response = client.put("/todos/1", json=new_todo)
+    assert response.status_code == 422
+    assert response.json()["detail"] == "title can't be empty!"
+
+def test_update_todo_user_not_found():
+    new_todo = {"title": "test_todo_update", "description": "test description update", "status": "Completed", "priority": "Low", "user_id": 231321}
+    response = client.put("/todos/1", json=new_todo)
+    assert response.status_code == 404
+    assert response.json()["detail"] == "User not found"
+
+def test_delete_todo():
+    response = client.delete("/todos/1")
+    assert response.status_code == 200
+    assert response.json()["detail"] == "Todo deleted"
+
+def test_delete_todo_not_found():
+    response = client.delete("/todos/12323")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Todo not found"
+
+def test_get_todos_by_user():
+    new_todo = {"title": "test_todo", "description": "test description", "status": "Pending", "priority": "Medium", "user_id": 1}
+    client.post("/todos/", json=new_todo)
+    response = client.get("/todos/todobyuser/1")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+def test_get_todos_by_user_not_found():
+    response = client.get("/todos/todobyuser/32324")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "User not found"
+
+def test_get_todos_by_user_no_todos():
+    new_user = {"username": "test_user2", "email": "test2@gmail.com"}
+    client.post("/users/", json=new_user)
+    response = client.get("/todos/todobyuser/2")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "No todo found for this user!"
+
+def test_get_todo_by_todoid_userid():
+    response = client.get("/todos/1/todobyuser/1")
+    assert response.status_code == 200
+    assert response.json()["title"] == "test_todo"
+    assert response.json()["description"] == "test description"
+    assert response.json()["status"] == "Pending"
+    assert response.json()["priority"] == "Medium"
+    assert response.json()["user_id"] == 1
+
+def test_get_todo_by_todoid_userid_user_not_found():
+    response = client.get("/todos/1432131/todobyuser/1")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "User not found"
+
+def test_get_todo_by_todoid_userid_todo_not_found():
+    response = client.get("/todos/1/todobyuser/214214312")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Todo not found"
+
+def test_get_todo_by_priority():
+    response = client.get("/todos/getbypriority/", params={"priority": "Medium"})
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+def test_get_todo_by_priority_not_found():
+    response = client.get("/todos/getbypriority/", params={"priority": "High"})
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Todos with this priority was not found"
