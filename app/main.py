@@ -4,7 +4,7 @@ from schemas import UserCreate, UserResponse, UserUpdate, TodoResponse, TodoCrea
 from typing import List
 from sqlalchemy.orm import Session
 from database import get_db, seed_db, User, Todo
-from services.user_service import read_user_by_id
+from services.user_service import read_user_by_id, user_create, read_all_users, user_update, user_delete
 
 
 
@@ -21,18 +21,12 @@ def on_startup():
 # Create a new user
 @app.post("/users/", response_model=UserResponse)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):
-    if not user.username:
-        raise HTTPException(status_code=422, detail="Username can't be empty!")
-    db_user = User(username=user.username, email=user.email)
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+    return user_create(user, db)
 
 # Get all users
 @app.get("/users/", response_model=List[UserResponse])
 def read_users(db: Session = Depends(get_db)):
-    return db.query(User).all()
+    return read_all_users(db)
 
 # Get a user by ID
 @app.get("/users/{user_id}", response_model=UserResponse)
@@ -42,26 +36,12 @@ def read_user(user_id: int, db: Session = Depends(get_db)):
 # Update a user by ID
 @app.put("/users/{user_id}", response_model=UserResponse)
 def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.id == user_id).first()
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    if not user.username:
-        raise HTTPException(status_code=422, detail="Username can't be empty!")
-    db_user.username = user.username
-    if user.email is not None:
-        db_user.email = user.email
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+    return user_update(user_id, user, db)
 
 # Delete a user by ID
 @app.delete("/users/{user_id}")
 def delete_user(user_id: int, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.id == user_id).first()
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    db.delete(db_user)
-    db.commit()
+    user_delete(user_id, db)
     return {"detail": "User deleted"}
 
 # Create a new todos
