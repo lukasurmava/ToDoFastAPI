@@ -4,6 +4,7 @@ from schemas import UserCreate, UserResponse, UserUpdate, TodoResponse, TodoCrea
 from typing import List
 from sqlalchemy.orm import Session
 from database import get_db, seed_db, User, Todo
+from services.user_service import read_user_by_id
 
 
 
@@ -36,10 +37,7 @@ def read_users(db: Session = Depends(get_db)):
 # Get a user by ID
 @app.get("/users/{user_id}", response_model=UserResponse)
 def read_user(user_id: int, db: Session = Depends(get_db)):
-    db_user = db.query(User).filter(User.id == user_id).first()
-    if not db_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
+    return read_user_by_id(user_id,db)
 
 # Update a user by ID
 @app.put("/users/{user_id}", response_model=UserResponse)
