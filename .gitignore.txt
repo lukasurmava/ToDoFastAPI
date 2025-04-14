@@ -1,0 +1,44 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+venv/
+.env/
+.env.*  # if you use dotenv files with environment-specific configs
+
+# IDEs/editors
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Pytest cache
+.pytest_cache/
+
+# Mypy, Pylint, coverage reports
+.mypy_cache/
+.pytype/
+.coverage
+htmlcov/
+coverage.xml
+
+# SQLite, local DBs, or cache files
+*.sqlite3
+*.db
+
+# FastAPI generated static/docs (optional)
+static/
+docs/
+
+# Logs
+*.log
+
+# Jupyter
+.ipynb_checkpoints/
