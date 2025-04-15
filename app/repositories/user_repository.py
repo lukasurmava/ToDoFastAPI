@@ -1,5 +1,6 @@
 from app.database import User
 from sqlalchemy.orm import Session
+from app.schemas import UserUpdate
 
 
 def insert_user(user: User, db: Session):
@@ -14,15 +15,13 @@ def get_all_users(db: Session):
 def get_user_by_id(user_id: int, db: Session):
     return db.query(User).filter(User.id == user_id).first()
 
-def update_user(user: User, db: Session):
-    db_user = get_user_by_id(user.id, db)
+def update_user(db_user: User, user: UserUpdate, db: Session):
     db_user.username = user.username
     db_user.email = user.email
     db.commit()
     db.refresh(db_user)
     return db_user
 
-def delete_user(user_id: int, db: Session):
-    db_user = get_user_by_id(user_id, db)
+def delete_user(db_user: User, db: Session):
     db.delete(db_user)
     db.commit()
