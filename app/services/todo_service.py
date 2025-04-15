@@ -32,7 +32,7 @@ def todo_update(todo_id: int, todo: TodoUpdate, db: Session):
     return update_todo(db_todo, todo, db)
 
 def todo_delete(todo_id: int, db: Session):
-    db_todo = get_todo_by_id(todo_id, db)
+    db_todo = read_todo_by_id(todo_id, db)
     delete_todo(db_todo, db)
     return {"detail": TODO_DELETED}
 

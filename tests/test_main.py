@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 from app.main import app  # Import your FastAPI app
+from app.resources.strings import USERNAME_CANT_BE_EMPTY, USER_NOT_FOUND, USER_DELETED, TITLE_CANT_BE_EMPTY, TODO_NOT_FOUND, TODO_DELETED, NO_TODO_FOR_THIS_USER, TODOS_WITH_THIS_PRIORITY_NOT_FOUND
 
 client = TestClient(app)  # Simulate API requests
 
@@ -22,7 +23,7 @@ def test_create_user_username():
     response = client.post("/users/", json=new_user)
     assert response.status_code == 422
     data = response.json()
-    assert data["detail"] == "Username can't be empty!"
+    assert data["detail"] == USERNAME_CANT_BE_EMPTY
 
 def test_read_user():
     response = client.get("/users/1")
@@ -35,7 +36,7 @@ def test_user_not_found():
     response = client.get("/users/555")
     assert response.status_code == 404
     data = response.json()
-    assert data["detail"] == "User not found"
+    assert data["detail"] == USER_NOT_FOUND
 
 def test_update_user():
     update_user = {"username": "test_update", "email": "test_update@gmail.com"}
@@ -50,26 +51,26 @@ def test_update_user_not_found():
     response = client.put("/users/4738", json=update_user)
     assert response.status_code == 404
     data = response.json()
-    assert data["detail"] == "User not found"
+    assert data["detail"] == USER_NOT_FOUND
 
 def test_update_user_username_empty():
     update_user = {"username": "", "email": "test_update@gmail.com"}
     response = client.put("/users/1", json=update_user)
     assert response.status_code == 422
     data = response.json()
-    assert data["detail"] == "Username can't be empty!"
+    assert data["detail"] == USERNAME_CANT_BE_EMPTY
 
 def test_delete_user():
     response = client.delete("/users/1")
     assert response.status_code == 200
     data = response.json()
-    assert data["detail"] == "User deleted"
+    assert data["detail"] == USER_DELETED
 
 def test_delete_user_not_found():
     response = client.delete("/users/1")
     assert response.status_code == 404
     data = response.json()
-    assert data["detail"] == "User not found"
+    assert data["detail"] == USER_NOT_FOUND
 
 def test_create_todo():
     new_user = {"username": "test_user", "email": "test@gmail.com"}
@@ -89,14 +90,14 @@ def test_create_todo_empty_title():
     response = client.post("/todos/", json=new_todo)
     assert response.status_code == 422
     data = response.json()
-    assert data["detail"] == "Title can't be empty!"
+    assert data["detail"] == TITLE_CANT_BE_EMPTY
 
 def test_create_todo_user_not_found():
     new_todo = {"title": "test_todo", "description": "test description", "status": "Pending", "priority": "Medium", "user_id": 345}
     response = client.post("/todos/", json=new_todo)
     assert response.status_code == 404
     data = response.json()
-    assert data["detail"] == "User by this id is not found!"
+    assert data["detail"] == USER_NOT_FOUND
 
 def test_get_all_todos():
     response = client.get("/todos/")
@@ -117,7 +118,7 @@ def test_get_todo_by_id_not_found():
     response = client.get("/todos/4343")
     assert response.status_code == 404
     data = response.json()
-    assert data["detail"] == "Todo not found"
+    assert data["detail"] == TODO_NOT_FOUND
 
 def test_update_todo():
     new_todo = {"title": "test_todo_update", "description": "test description update", "status": "Completed", "priority": "Low", "user_id": 1}
@@ -134,29 +135,29 @@ def test_update_todo_not_found():
     response = client.put("/todos/34324", json=new_todo)
     assert response.status_code == 404
     data = response.json()
-    assert data["detail"] == "Todo not found"
+    assert data["detail"] == TODO_NOT_FOUND
 
 def test_update_todo_empty_title():
     new_todo = {"title": "", "description": "test description update", "status": "Completed", "priority": "Low", "user_id": 1}
     response = client.put("/todos/1", json=new_todo)
     assert response.status_code == 422
-    assert response.json()["detail"] == "title can't be empty!"
+    assert response.json()["detail"] == TITLE_CANT_BE_EMPTY
 
 def test_update_todo_user_not_found():
     new_todo = {"title": "test_todo_update", "description": "test description update", "status": "Completed", "priority": "Low", "user_id": 231321}
     response = client.put("/todos/1", json=new_todo)
     assert response.status_code == 404
-    assert response.json()["detail"] == "User not found"
+    assert response.json()["detail"] == USER_NOT_FOUND
 
 def test_delete_todo():
     response = client.delete("/todos/1")
     assert response.status_code == 200
-    assert response.json()["detail"] == "Todo deleted"
+    assert response.json()["detail"] == TODO_DELETED
 
 def test_delete_todo_not_found():
     response = client.delete("/todos/12323")
     assert response.status_code == 404
-    assert response.json()["detail"] == "Todo not found"
+    assert response.json()["detail"] == TODO_NOT_FOUND
 
 def test_get_todos_by_user():
     new_todo = {"title": "test_todo", "description": "test description", "status": "Pending", "priority": "Medium", "user_id": 1}
@@ -168,14 +169,14 @@ def test_get_todos_by_user():
 def test_get_todos_by_user_not_found():
     response = client.get("/todos/todobyuser/32324")
     assert response.status_code == 404
-    assert response.json()["detail"] == "User not found"
+    assert response.json()["detail"] == USER_NOT_FOUND
 
 def test_get_todos_by_user_no_todos():
     new_user = {"username": "test_user2", "email": "test2@gmail.com"}
     client.post("/users/", json=new_user)
     response = client.get("/todos/todobyuser/2")
     assert response.status_code == 404
-    assert response.json()["detail"] == "No todo found for this user!"
+    assert response.json()["detail"] == NO_TODO_FOR_THIS_USER
 
 def test_get_todo_by_todoid_userid():
     response = client.get("/todos/1/todobyuser/1")
@@ -189,12 +190,12 @@ def test_get_todo_by_todoid_userid():
 def test_get_todo_by_todoid_userid_user_not_found():
     response = client.get("/todos/1432131/todobyuser/1")
     assert response.status_code == 404
-    assert response.json()["detail"] == "User not found"
+    assert response.json()["detail"] == USER_NOT_FOUND
 
 def test_get_todo_by_todoid_userid_todo_not_found():
     response = client.get("/todos/1/todobyuser/214214312")
     assert response.status_code == 404
-    assert response.json()["detail"] == "Todo not found"
+    assert response.json()["detail"] == TODO_NOT_FOUND
 
 def test_get_todo_by_priority():
     response = client.get("/todos/getbypriority/", params={"priority": "Medium"})
@@ -204,4 +205,4 @@ def test_get_todo_by_priority():
 def test_get_todo_by_priority_not_found():
     response = client.get("/todos/getbypriority/", params={"priority": "High"})
     assert response.status_code == 404
-    assert response.json()["detail"] == "Todos with this priority was not found"
+    assert response.json()["detail"] == TODOS_WITH_THIS_PRIORITY_NOT_FOUND
