@@ -1,9 +1,9 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, Depends
 from database import PriorityEnum
 from schemas import UserCreate, UserResponse, UserUpdate, TodoResponse, TodoCreate, TodoUpdate
 from typing import List
 from sqlalchemy.orm import Session
-from database import get_db, seed_db, User, Todo
+from database import get_db, seed_db
 from services.user_service import read_user_by_id, user_create, read_all_users, user_update, user_delete
 from services.todo_service import todo_create, read_all_todos, read_todo_by_id, todo_update, todo_delete, read_todo_by_user, read_todo_by_todoid_userid, read_todo_by_priority
 

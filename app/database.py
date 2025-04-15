@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from sqlalchemy import create_engine, Column, Integer, String, ForeignKey, Enum
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session
 from sqlalchemy.pool import StaticPool
 
