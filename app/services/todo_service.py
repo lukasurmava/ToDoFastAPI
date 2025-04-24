@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException
 from app.resources.strings import TITLE_CANT_BE_EMPTY, TODO_NOT_FOUND, TODO_DELETED, NO_TODO_FOR_THIS_USER, TODO_WITH_THIS_USER_NOT_FOUND, TODOS_WITH_THIS_PRIORITY_NOT_FOUND
 from app.schemas import TodoCreate, TodoUpdate
-from app.database import Todo, PriorityEnum
+from app.models import Todo, PriorityEnum
 from app.services.user_service import read_user_by_id
 from app.repositories.todo_repository import insert_todo, get_all_todos, get_todo_by_id, update_todo, delete_todo, get_todo_by_user, get_todo_by_priority
 

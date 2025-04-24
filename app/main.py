@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends
-from app.database import PriorityEnum, get_db, seed_db
+from app.models import PriorityEnum
+from app.database import get_db, seed_db
 from app.schemas import UserCreate, UserResponse, UserUpdate, TodoResponse, TodoCreate, TodoUpdate
 from typing import List
 from sqlalchemy.orm import Session

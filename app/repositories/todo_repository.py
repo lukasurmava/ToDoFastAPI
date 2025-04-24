@@ -1,4 +1,4 @@
-from app.database import Todo, PriorityEnum
+from app.models import Todo, PriorityEnum
 from sqlalchemy.orm import Session
 from app.schemas import TodoUpdate
 

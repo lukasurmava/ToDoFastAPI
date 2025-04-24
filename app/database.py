@@ -3,6 +3,9 @@ from enum import StrEnum
 from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session
 from sqlalchemy.pool import StaticPool
+from app.models import User, Todo
+from app.base import Base
+
 
 # --- Database Setup ---
 DATABASE_URL = "sqlite:///:memory:"  # In-memory DB
@@ -13,36 +16,7 @@ engine = create_engine(
     echo=True  # Debug: prints SQL statements
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
-
-class StatusEnum(StrEnum):
-    IN_PROGRESS = "In progress"
-    COMPLETED = "Completed"
-    PENDING = "Pending"
-
-class PriorityEnum(StrEnum):
-    LOW = "Low"
-    MEDIUM = "Medium"
-    HIGH = "High"
-
-
-# --- SQLAlchemy Model ---
-class User(Base):
-    __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True)
-    email = Column(String, unique=True, index=True)
-    todos = relationship("Todo", back_populates="user")
-
-class Todo(Base):
-    __tablename__ = "todos"
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String)
-    description = Column(String)
-    status = Column(String)
-    priority = Column(String)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    user = relationship("User", back_populates="todos")
+#Base = declarative_base()
 
 
 # Create the tables
@@ -58,6 +32,7 @@ def get_db():
         db.close()
 
 def seed_db():
+    #from app.models import User, Todo
     db: Session = SessionLocal()
     # Only seed if there are no records
     if not db.query(User).first():

@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from app.database import PriorityEnum, StatusEnum
+from app.models import PriorityEnum, StatusEnum
 
 # --- Pydantic Schemas ---
 

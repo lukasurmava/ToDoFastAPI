@@ -3,7 +3,7 @@ from app.repositories.user_repository import get_user_by_id, insert_user, get_al
 from fastapi import HTTPException
 from app.resources.strings import USER_NOT_FOUND, USERNAME_CANT_BE_EMPTY, USER_DELETED
 from app.schemas import UserCreate, UserUpdate
-from app.database import User
+from app.models import User
 
 
 def user_create(user: UserCreate, db: Session):
